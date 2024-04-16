@@ -1,0 +1,10 @@
+easy_admin:
+  entities:
+    Product:
+      class: App\Entity\Product
+      form:
+        fields:
+          - { property: "name", type: "text" }
+          - { property: "price", type: "number" }
+          - { property: "description", type: "textarea" }
+          - { property: "imageFile", type: "vich_image" }
