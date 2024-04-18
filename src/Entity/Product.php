@@ -58,6 +58,12 @@ class Product
     #[Vich\UploadableField(mapping: 'products', fileNameProperty: 'imageName', size: 'imageSize')]
     private ?File $imageFile = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $category = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $repas = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -193,6 +199,30 @@ class Product
     public function setStripePriceId(?string $stripePriceId): static
     {
         $this->stripePriceId = $stripePriceId;
+
+        return $this;
+    }
+
+    public function getCategory(): ?string
+    {
+        return $this->category;
+    }
+
+    public function setCategory(string $category): static
+    {
+        $this->category = $category;
+
+        return $this;
+    }
+
+    public function getRepas(): ?string
+    {
+        return $this->repas;
+    }
+
+    public function setRepas(string $repas): static
+    {
+        $this->repas = $repas;
 
         return $this;
     }

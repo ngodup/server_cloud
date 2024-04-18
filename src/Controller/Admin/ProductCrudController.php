@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\Field;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\MoneyField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -42,6 +43,27 @@ class ProductCrudController extends AbstractCrudController
         yield Field::new('imageFile', 'Image')
             ->setFormType(VichFileType::class)
             ->onlyOnForms();
+
+        yield ChoiceField::new('category')
+            ->setChoices([
+                'Français' => 'français',
+                'Indienne' => 'iindienne',
+                'Japonaise' => 'japonaise',
+                'Italienne' => 'italienne',
+                'Tibétaine' => 'tibétaine',
+                'Vietnamienne' => 'vietnamienne',
+            ])
+            ->setRequired(true);
+
+        yield ChoiceField::new('repas')
+            ->setChoices([
+                'Végétarien' => 'végétarien',
+                'Non-végétarien' => 'non-végétarien',
+                'Petit-déjeuner' => 'petit-déjeuner',
+                'Déjeuner' => 'déjeuner',
+                'Dîner' => 'dîner',
+            ])
+            ->setRequired(true);
 
         yield TextField::new('stripeProductId', 'Identifiant Produit Stripe')
             ->hideWhenCreating();
