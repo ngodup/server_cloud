@@ -64,6 +64,9 @@ class Product
     #[ORM\Column(length: 255)]
     private ?string $repas = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $repasType = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -223,6 +226,18 @@ class Product
     public function setRepas(string $repas): static
     {
         $this->repas = $repas;
+
+        return $this;
+    }
+
+    public function getRepasType(): ?string
+    {
+        return $this->repasType;
+    }
+
+    public function setRepasType(string $repasType): static
+    {
+        $this->repasType = $repasType;
 
         return $this;
     }

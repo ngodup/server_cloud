@@ -59,6 +59,14 @@ class ProductCrudController extends AbstractCrudController
             ->setChoices([
                 'Végétarien' => 'végétarien',
                 'Non-végétarien' => 'non-végétarien',
+            ])
+            ->setRequired(true);
+
+        yield ChoiceField::new('repasType')
+            ->setChoices([
+                'Boissons' => 'boissons',
+                'Boissons alcoolisées' => 'boissons-alcoolisées',
+                'Non-végétarien' => 'non-végétarien',
                 'Petit-déjeuner' => 'petit-déjeuner',
                 'Déjeuner' => 'déjeuner',
                 'Dîner' => 'dîner',
