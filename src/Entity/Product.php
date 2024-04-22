@@ -58,13 +58,16 @@ class Product
     #[Vich\UploadableField(mapping: 'products', fileNameProperty: 'imageName', size: 'imageSize')]
     private ?File $imageFile = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups('product:read')]
     private ?string $category = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups('product:read')]
     private ?string $repas = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups('product:read')]
     private ?string $repasType = null;
 
     public function getId(): ?int

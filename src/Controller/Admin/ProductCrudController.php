@@ -66,7 +66,6 @@ class ProductCrudController extends AbstractCrudController
             ->setChoices([
                 'Boissons' => 'boissons',
                 'Boissons alcoolisées' => 'boissons-alcoolisées',
-                'Non-végétarien' => 'non-végétarien',
                 'Petit-déjeuner' => 'petit-déjeuner',
                 'Déjeuner' => 'déjeuner',
                 'Dîner' => 'dîner',
