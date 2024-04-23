@@ -113,7 +113,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/api/me', name: 'api_user_profile', methods: ['GET'])]
-    public function userProfile(TokenStorageInterface $tokenStorage): JsonResponse
+    public function userProfile(TokenStorageInterface $tokenStorage, EntityManagerInterface $entityManager): JsonResponse
     {
         $token = $tokenStorage->getToken();
         if (null === $token) {
@@ -127,12 +127,33 @@ class UserController extends AbstractController
             return $this->json(['message' => 'Token does not contain a valid user.'], JsonResponse::HTTP_UNAUTHORIZED);
         }
 
-        // Now it's safe to call User-specific methods like getId and getEmail
+        // Fetch the UserProfile entity related to the User entity
+        $userProfile = $entityManager->getRepository(UserProfile::class)->findOneBy(['user' => $user]);
+
+        // Check if the UserProfile entity exists
+        if (!$userProfile instanceof UserProfile) {
+            return $this->json(['message' => 'User profile not found.'], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        // Now it's safe to call User-specific and UserProfile-specific methods
         return $this->json([
             'user' => [
                 'id' => $user->getId(),
                 'email' => $user->getEmail(),
                 'roles' => $user->getRoles(),
+                'userProfile' => [
+                    'id' => $userProfile->getId(),
+                    'prenom' => $userProfile->getPrenom(),
+                    'nom' => $userProfile->getNom(),
+                    'phoneNumber' => $userProfile->getPhoneNumber(),
+                    'address' => $userProfile->getAddress(),
+                    'dateDeNaissance' => $userProfile->getDateDeNaissance(),
+                    'phoneNumber' => $userProfile->getPhoneNumber(),
+                    'address' => $userProfile->getAddress(),
+                    'ville' => $userProfile->getVille(),
+                    'codePostal' => $userProfile->getCodePostal(),
+                    'photoDeProfil' => $userProfile->getPhotoDeProfil()
+                ]
             ]
         ]);
     }
