@@ -2,9 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\CommentRepository;
+use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\CommentRepository;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CommentRepository::class)]
 class Comment
@@ -15,14 +17,34 @@ class Comment
     private ?int $id = null;
 
     #[ORM\Column(length: 400)]
+    #[Groups(['comment'])]
     private ?string $content = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['comment'])]
     private ?\DateTimeInterface $createdAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'comments')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Product $product = null;
+
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $author;
+
+    public function getAuthor(): ?string
+    {
+        return $this->author;
+    }
+
+    public function setAuthor(?User $author): self
+    {
+        $this->author = $author;
+
+        return $this;
+    }
 
     public function getId(): ?int
     {
@@ -46,10 +68,9 @@ class Comment
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeInterface $createdAt): static
+    public function setCreatedAt(DateTime $createdAt): self
     {
         $this->createdAt = $createdAt;
-
         return $this;
     }
 
