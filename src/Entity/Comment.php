@@ -17,34 +17,18 @@ class Comment
     private ?int $id = null;
 
     #[ORM\Column(length: 400)]
-    #[Groups(['comment'])]
+    // #[Groups(['comment'])]
+    #[Groups('product:detail')]
     private ?string $content = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['comment'])]
+    // #[Groups(['comment'])]
+    #[Groups('product:detail')]
     private ?\DateTimeInterface $createdAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'comments')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Product $product = null;
-
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $author;
-
-    public function getAuthor(): ?string
-    {
-        return $this->author;
-    }
-
-    public function setAuthor(?User $author): self
-    {
-        $this->author = $author;
-
-        return $this;
-    }
 
     public function getId(): ?int
     {

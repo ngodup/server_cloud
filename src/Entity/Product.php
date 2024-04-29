@@ -48,7 +48,7 @@ class Product
     private ?bool $active = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups('product:read')]
+    #[Groups('product:detail')]
     private ?string $description = null;
 
     #[ORM\Column(nullable: true)]
@@ -76,6 +76,7 @@ class Product
      * @var Collection<int, Comment>
      */
     #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'product', orphanRemoval: true)]
+    #[Groups('product:detail')]
     private Collection $comments;
 
     public function __construct()
