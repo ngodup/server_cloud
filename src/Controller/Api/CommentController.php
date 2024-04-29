@@ -44,7 +44,7 @@ class CommentController extends AbstractController
         }
 
         // Deserialize the JSON request body into a Comment object
-        $commentData = json_decode($request->getContent(), true);
+        // $commentData = json_decode($request->getContent(), true);
         // $comment = $this->serializer->deserialize(json_encode($commentData), Comment::class, 'json');
         $comment = $this->serializer->deserialize($request->getContent(), Comment::class, 'json');
 
