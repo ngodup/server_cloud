@@ -48,7 +48,7 @@ class Product
     private ?bool $active = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups('product:detail')]
+    #[Groups('product:read')]
     private ?string $description = null;
 
     #[ORM\Column(nullable: true)]
