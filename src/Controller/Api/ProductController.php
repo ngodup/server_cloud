@@ -132,8 +132,8 @@ class ProductController extends AbstractController
             $comments[] = [
                 'id' => $comment['id'],
                 'content' => $comment['content'],
-                'createdAt' => $comment['createdAt'], // Assuming createdAt exists
-                'author' => $comment['author'] ? $comment['author']['email'] : null,
+                'createdAt' => $comment['createdAt']->format('Y-m-d H:i:s'), // Assuming createdAt exists
+                'author' => $comment['author'] ? $comment['author']['userProfile']['nom'] : null,
                 'prenom' => $comment['author']['userProfile'] ? $comment['author']['userProfile']['prenom'] : null,
             ];
         }

@@ -6,6 +6,7 @@ use DateTime;
 use DateTimeImmutable;
 use App\Entity\Comment;
 use App\Entity\Product;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,12 +22,14 @@ class CommentController extends AbstractController
     private TokenStorageInterface $tokenStorage;
     private ManagerRegistry $doctrine;
     private SerializerInterface $serializer;
+    private EntityManagerInterface $entityManager;
 
-    public function __construct(TokenStorageInterface $tokenStorage, ManagerRegistry $doctrine, SerializerInterface $serializer)
+    public function __construct(TokenStorageInterface $tokenStorage, ManagerRegistry $doctrine, SerializerInterface $serializer, EntityManagerInterface $entityManager)
     {
         $this->tokenStorage = $tokenStorage;
         $this->doctrine = $doctrine;
         $this->serializer = $serializer;
+        $this->entityManager = $entityManager;
     }
 
     #[Route('/api/products/{productId}/comments', name: 'add_comment', methods: ['POST'])]
@@ -73,5 +76,27 @@ class CommentController extends AbstractController
         // Serialize and return the created comment as JSON
         $serializedComment = $this->serializer->serialize($comment, 'json', ['groups' => 'comment']);
         return new JsonResponse($serializedComment, Response::HTTP_CREATED, [], true);
+    }
+
+    #[Route('/api/comments/user', name: 'user_comments', methods: ['POST'])]
+    public function commentsByUser(Request $request): JsonResponse
+    {
+        $token = $this->tokenStorage->getToken();
+        if (null === $token) {
+            return $this->json(['message' => 'No authentication token found.'], JsonResponse::HTTP_UNAUTHORIZED);
+        }
+
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['email']) || !is_string($data['email'])) {
+            return new JsonResponse(['error' => 'Invalid email provided.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $email = $data['email'];
+        $comments = $this->entityManager->getRepository(Comment::class)->findByUserEmail($email);
+
+        $serializedComments = $this->serializer->serialize($comments, 'json', ['groups' => 'product:detail']);
+
+        return new JsonResponse($serializedComments, Response::HTTP_OK, [], true);
     }
 }

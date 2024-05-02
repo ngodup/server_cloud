@@ -65,7 +65,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEmail(string $email): static
     {
         $this->email = $email;
-
         return $this;
     }
 
@@ -99,7 +98,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setRoles(array $roles): static
     {
         $this->roles = $roles;
-
         return $this;
     }
 
@@ -114,7 +112,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPassword(string $password): static
     {
         $this->password = $password;
-
         return $this;
     }
 
@@ -138,7 +135,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         if ($userProfile->getUser() !== $this) {
             $userProfile->setUser($this);
         }
-
         $this->userProfile = $userProfile;
 
         return $this;
