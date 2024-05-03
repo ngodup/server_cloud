@@ -119,6 +119,23 @@ class ProductController extends AbstractController
 
         $data = $qb->getQuery()->getResult(Query::HYDRATE_ARRAY);   // Get results as an array directly
 
+        if (!$data) {
+            $productData = [
+                'id' => $product->getId(),
+                'name' => $product->getName(),
+                'description' => $product->getDescription(),
+                'price' => $product->getPrice(),
+                'imageName' => $product->getImageName(),
+                '$category' => $product->getCategory(),
+                'repas' => $product->getRepas(),
+                'repasType' => $product->getRepasType(),
+            ];
+            return new JsonResponse([
+                'product' => $productData,
+                'comments' => [],
+            ], Response::HTTP_OK);
+        }
+
         $productData = [
             'id' => $data[0]['id'], // Assuming the first element is the product
             'name' => $data[0]['name'],
