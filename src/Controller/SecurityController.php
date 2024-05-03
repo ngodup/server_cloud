@@ -12,9 +12,6 @@ class SecurityController extends AbstractController
     public function logout(): Response
     {
         // No specific action needed with JWT, token invalidation happens automatically
-        //return new Response('', Response::HTTP_NO_CONTENT); // Consider a redirect to login page
-        return $this->render('security/index.html.twig', [
-            'controller_name' => 'SecurityController',
-        ]);
+        return new Response('', Response::HTTP_NO_CONTENT);
     }
 }
