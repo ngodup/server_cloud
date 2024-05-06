@@ -30,87 +30,73 @@ class UserController extends AbstractController
     #[Route('/register', name: 'register_user', methods: ['POST'])]
     public function register(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-
-        $email = $data['email'] ?? null;
-        $password = $data['password'] ?? null;
+        $email = $request->request->get('email');
+        $password = $request->request->get('password');
 
         if (!$email || !$password) {
-            return new JsonResponse([
-                'status' => false,
-                'message' => 'Email and password are required'
-            ], JsonResponse::HTTP_BAD_REQUEST);
+            return $this->json(['status' => false, 'message' => 'Email and password are required'], JsonResponse::HTTP_BAD_REQUEST);
         }
 
-        // Check if the email already exists
         $userRepository = $entityManager->getRepository(User::class);
         $emailExist = $userRepository->findOneBy(['email' => $email]);
 
         if ($emailExist) {
-            return new JsonResponse([
-                'status' => false,
-                'message' => 'This email already exists, please use a different one'
-            ], JsonResponse::HTTP_CONFLICT);
+            return $this->json(['status' => false, 'message' => 'This email already exists, please use a different one'], JsonResponse::HTTP_CONFLICT);
         }
 
-        // Create new user with hashed password
         $user = new User();
         $user->setEmail($email);
         $user->setPassword($passwordHasher->hashPassword($user, $password));
 
-        // Create user profile and link it to the user
         $profile = new UserProfile();
-        $profile->setUser($user); // Set the association
+        $profile->setUser($user);
 
-        // Optionally set other profile details if they exist in the request
-        // Set profile details from the request, checking each for presence before setting
-        if (isset($data['prenom'])) {
-            $profile->setPrenom($data['prenom']);
-        }
-        if (isset($data['nom'])) {
-            $profile->setNom($data['nom']);
-        }
-        if (isset($data['dateDeNaissance'])) {
-            $dateDeNaissance = \DateTime::createFromFormat('Y-m-d', $data['dateDeNaissance']);
-            if ($dateDeNaissance !== false) {
-                $profile->setDateDeNaissance($dateDeNaissance);
+
+
+        $profileData = ['prenom', 'nom', 'dateDeNaissance', 'phoneNumber', 'address', 'ville', 'codePostal', 'photoDeProfil'];
+
+
+        foreach ($profileData as $field) {
+            if ($request->request->has($field)) {
+                $method = 'set' . ucfirst($field);
+                if ($field === 'dateDeNaissance') {
+                    $value = \DateTime::createFromFormat('Y-m-d', $request->request->get($field));
+                    if ($value !== false) {
+                        $profile->$method($value);
+                    }
+                } elseif ($field === 'codePostal') {
+                    $value = intval($request->request->get($field));
+                    if ($value !== 0) {
+                        $profile->$method($value);
+                    }
+                } else {
+                    $profile->$method($request->request->get($field));
+                }
             }
         }
-        if (isset($data['phoneNumber'])) {
-            $profile->setPhoneNumber($data['phoneNumber']);
-        }
-        if (isset($data['address'])) {
-            $profile->setAddress($data['address']);
-        }
-        if (isset($data['ville'])) {
-            $profile->setVille($data['ville']);
-        }
-        if (isset($data['codePostal'])) {
-            $codePostal = intval($data['codePostal']);
-            if ($codePostal !== 0) {
-                $profile->setCodePostal($codePostal);
-            }
-        }
-        if (isset($data['photoDeProfil'])) {
-            $profile->setPhotoDeProfil($data['photoDeProfil']);
+
+        //Check if Profile file is exist of not
+        $photoDeProfilFile = $request->files->get('photoDeProfil');
+        if ($photoDeProfilFile) {
+            $uploadsDirectory = $this->getParameter('kernel.project_dir') . '/public/images/profiles';
+            $fileName = uniqid() . '.' . $photoDeProfilFile->guessExtension();
+            $photoDeProfilFile->move($uploadsDirectory, $fileName);
+            $profile->setPhotoDeProfil($fileName);
         }
 
         $entityManager->persist($user);
         $entityManager->persist($profile);
         $entityManager->flush();
-        // Add more fields as necessary
 
-        $entityManager->persist($user);
-        $entityManager->persist($profile);
-        $entityManager->flush();
-
-        return new JsonResponse([
+        return $this->json([
             'status' => true,
             'message' => 'User registration successful',
-            'userId' => $user->getId(),  // Optionally return the user ID or other confirmation details
-            'profileId' => $profile->getId() // Optionally return the profile ID
+            'userId' => $user->getId(),
+            'profileId' => $profile->getId()
         ], JsonResponse::HTTP_CREATED);
     }
+
+
 
     #[Route('/api/me', name: 'api_user_profile', methods: ['GET'])]
     public function userProfile(TokenStorageInterface $tokenStorage, EntityManagerInterface $entityManager): JsonResponse
