@@ -144,14 +144,20 @@ class ProductController extends AbstractController
         ];
 
         $comments = [];
-        // Loop through the comments nested within the first element of the $data array
+
         foreach ($data[0]['comments'] as $comment) {
+            $author = $comment['author'] ? [
+                'id' => $comment['author']['id'],
+                'email' => $comment['author']['email'],
+                'nom' => $comment['author']['userProfile']['nom'],
+                'prenom' => $comment['author']['userProfile']['prenom'],
+            ] : null;
+
             $comments[] = [
                 'id' => $comment['id'],
                 'content' => $comment['content'],
                 'createdAt' => $comment['createdAt']->format('Y-m-d H:i:s'), // Assuming createdAt exists
-                'author' => $comment['author'] ? $comment['author']['userProfile']['nom'] : null,
-                'prenom' => $comment['author']['userProfile'] ? $comment['author']['userProfile']['prenom'] : null,
+                'author' => $author,
             ];
         }
 

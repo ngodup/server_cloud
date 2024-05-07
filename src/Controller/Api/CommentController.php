@@ -74,7 +74,7 @@ class CommentController extends AbstractController
         $entityManager->flush();
 
         // Serialize and return the created comment as JSON
-        $serializedComment = $this->serializer->serialize($comment, 'json', ['groups' => 'comment']);
+        $serializedComment = $this->serializer->serialize($comment, 'json', ['groups' => ['product:detail', 'comment']]);
         return new JsonResponse($serializedComment, Response::HTTP_CREATED, [], true);
     }
 
@@ -95,7 +95,7 @@ class CommentController extends AbstractController
         $email = $data['email'];
         $comments = $this->entityManager->getRepository(Comment::class)->findByUserEmail($email);
 
-        $serializedComments = $this->serializer->serialize($comments, 'json', ['groups' => 'product:detail']);
+        $serializedComments = $this->serializer->serialize($comments, 'json', ['groups' => 'product:detail', 'comment']);
 
         return new JsonResponse($serializedComments, Response::HTTP_OK, [], true);
     }
@@ -132,7 +132,7 @@ class CommentController extends AbstractController
         $entityManager->flush();
 
         // Serialize and return the updated comment as JSON
-        $serializedComment = $this->serializer->serialize($comment, 'json', ['groups' => 'comment']);
+        $serializedComment = $this->serializer->serialize($comment, 'json', ['groups' => 'product:detail', 'comment']);
         return new JsonResponse($serializedComment, Response::HTTP_OK, [], true);
     }
 

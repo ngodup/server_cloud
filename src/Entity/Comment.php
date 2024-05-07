@@ -14,6 +14,7 @@ class Comment
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups("comment")]
     private ?int $id = null;
 
     #[ORM\Column(length: 400)]
@@ -31,6 +32,7 @@ class Comment
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'comments')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups("comment")]
     private ?User $author = null;
 
     public function getId(): ?int
