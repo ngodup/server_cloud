@@ -99,4 +99,70 @@ class CommentController extends AbstractController
 
         return new JsonResponse($serializedComments, Response::HTTP_OK, [], true);
     }
+
+    #[Route('/api/comments/{commentId}', name: 'update_comment', methods: ['PATCH'])]
+    public function updateComment(Request $request, int $commentId): JsonResponse
+    {
+        $token = $this->tokenStorage->getToken();
+        if (null === $token) {
+            return $this->json(['message' => 'No authentication token found.'], JsonResponse::HTTP_UNAUTHORIZED);
+        }
+
+        $comment = $this->entityManager->getRepository(Comment::class)->find($commentId);
+
+        if (!$comment) {
+            return new JsonResponse(['error' => 'Comment not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        // Check if the user is the author of the comment before updating
+        $user = $token->getUser();
+        if ($user !== $comment->getAuthor()) {
+            return new JsonResponse(['error' => 'User not authorized to update this comment'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        // Deserialize the JSON request body into a Comment object
+        $updatedCommentData = $this->serializer->deserialize($request->getContent(), Comment::class, 'json');
+
+        // Update only the content field with the new data
+        $comment->setContent($updatedCommentData->getContent());
+
+        // Persist and flush the updated comment
+        $entityManager = $this->doctrine->getManager();
+        $entityManager->persist($comment);
+        $entityManager->flush();
+
+        // Serialize and return the updated comment as JSON
+        $serializedComment = $this->serializer->serialize($comment, 'json', ['groups' => 'comment']);
+        return new JsonResponse($serializedComment, Response::HTTP_OK, [], true);
+    }
+
+
+    #[Route('/api/comments/{commentId}', name: 'delete_comment', methods: ['DELETE'])]
+    public function deleteComment(int $commentId): JsonResponse
+    {
+        $token = $this->tokenStorage->getToken();
+        if (null === $token) {
+            return $this->json(['message' => 'No authentication token found.'], JsonResponse::HTTP_UNAUTHORIZED);
+        }
+
+        $comment = $this->doctrine->getRepository(Comment::class)->find($commentId);
+
+        if (!$comment) {
+            return new JsonResponse(['error' => 'Comment not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        // Check if the user is the author of the comment before deleting
+        $user = $token->getUser();
+        if ($user !== $comment->getAuthor()) {
+            return new JsonResponse(['error' => 'User not authorized to delete this comment'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        // Remove and flush the comment
+        $entityManager = $this->doctrine->getManager();
+        $entityManager->remove($comment);
+        $entityManager->flush();
+
+        // Return a success message
+        return new JsonResponse(['message' => 'Comment deleted successfully'], Response::HTTP_OK);
+    }
 }
