@@ -148,7 +148,6 @@ class ProductController extends AbstractController
         foreach ($data[0]['comments'] as $comment) {
             $author = $comment['author'] ? [
                 'id' => $comment['author']['id'],
-                'email' => $comment['author']['email'],
                 'nom' => $comment['author']['userProfile']['nom'],
                 'prenom' => $comment['author']['userProfile']['prenom'],
             ] : null;

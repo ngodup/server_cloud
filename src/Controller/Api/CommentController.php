@@ -78,25 +78,25 @@ class CommentController extends AbstractController
         return new JsonResponse($serializedComment, Response::HTTP_CREATED, [], true);
     }
 
-    #[Route('/api/comments/user', name: 'user_comments', methods: ['POST'])]
-    public function commentsByUser(Request $request): JsonResponse
+    #[Route('/api/comments/user', name: 'user_comments', methods: ['GET'])]
+    public function commentsByUser(Request $request, TokenStorageInterface $tokenStorage, EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
     {
-        $token = $this->tokenStorage->getToken();
+        $token = $tokenStorage->getToken();
         if (null === $token) {
             return $this->json(['message' => 'No authentication token found.'], JsonResponse::HTTP_UNAUTHORIZED);
         }
 
-        $data = json_decode($request->getContent(), true);
+        // Get the email from the query parameter
+        $email = $request->query->get('email');
 
-        if (!isset($data['email']) || !is_string($data['email'])) {
+        if (!is_string($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return new JsonResponse(['error' => 'Invalid email provided.'], Response::HTTP_BAD_REQUEST);
         }
 
-        $email = $data['email'];
-        $comments = $this->entityManager->getRepository(Comment::class)->findByUserEmail($email);
+        $comments = $entityManager->getRepository(Comment::class)->findByUserEmail($email);
 
-        $serializedComments = $this->serializer->serialize($comments, 'json', ['groups' => 'product:detail', 'comment']);
-
+        // Serialize and return the comments as JSON
+        $serializedComments = $serializer->serialize($comments, 'json', ['groups' => 'product:detail', 'comment']);
         return new JsonResponse($serializedComments, Response::HTTP_OK, [], true);
     }
 

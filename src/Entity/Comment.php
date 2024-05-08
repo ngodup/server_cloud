@@ -14,7 +14,7 @@ class Comment
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups("comment")]
+    #[Groups("product:detail")]
     private ?int $id = null;
 
     #[ORM\Column(length: 400)]
