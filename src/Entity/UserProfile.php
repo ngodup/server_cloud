@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\UserProfileRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserProfileRepository::class)]
 class UserProfile
@@ -12,30 +13,39 @@ class UserProfile
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups("profile")]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups("profile")]
     private ?string $prenom = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups("profile")]
     private ?string $nom = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Groups("profile")]
     private ?\DateTimeInterface $dateDeNaissance = null;
 
     #[ORM\Column(length: 20, nullable: true)]
+    #[Groups("profile")]
     private ?string $phoneNumber = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups("profile")]
     private ?string $address = null;
 
     #[ORM\Column(length: 100, nullable: true)]
+    #[Groups("profile")]
     private ?string $ville = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups("profile")]
     private ?int $codePostal = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups("profile")]
     private ?string $photoDeProfil = null;
 
     #[ORM\OneToOne(inversedBy: 'userProfile', cascade: ['persist', 'remove'])]

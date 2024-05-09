@@ -17,13 +17,13 @@ use Doctrine\ORM\EntityManagerInterface; // Import EntityManagerInterface
 class StripeController extends AbstractController
 {
     private $stripeService;
-    private $serializer;
+    // private $serializer;
     private $entityManager; // Inject EntityManagerInterface
 
-    public function __construct(StripeService $stripeService, SerializerInterface $serializer, EntityManagerInterface $entityManager)
+    public function __construct(StripeService $stripeService, EntityManagerInterface $entityManager)
     {
         $this->stripeService = $stripeService;
-        $this->serializer = $serializer;
+        // $this->serializer = $serializer;
         $this->entityManager = $entityManager;
     }
 
