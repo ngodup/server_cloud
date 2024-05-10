@@ -119,50 +119,45 @@ class ProductController extends AbstractController
 
         $data = $qb->getQuery()->getResult(Query::HYDRATE_ARRAY);   // Get results as an array directly
 
-        if (!$data) {
+
+        if (!empty($data)) {
             $productData = [
-                'id' => $product->getId(),
-                'name' => $product->getName(),
-                'description' => $product->getDescription(),
-                'price' => $product->getPrice(),
-                'imageName' => $product->getImageName(),
-                '$category' => $product->getCategory(),
-                'repas' => $product->getRepas(),
-                'repasType' => $product->getRepasType(),
+                'id' => $data[0]['id'],
+                'name' => $data[0]['name'],
+                'description' => $data[0]['description'],
+                'price' => $data[0]['price'],
+                'imageName' => $data[0]['imageName'],
+                'category' => $data[0]['category'], // Remove the '$' sign
+                'repas' => $data[0]['repas'],
+                'repasType' => $data[0]['repasType'],
             ];
+
+            $comments = [];
+
+            if (isset($data[0]['comments'])) {
+                foreach ($data[0]['comments'] as $comment) {
+                    $author = null;
+                    if (isset($comment['author']) && isset($comment['author']['userProfile'])) {
+                        $author = [
+                            'id' => $comment['author']['id'],
+                            'nom' => $comment['author']['userProfile']['nom'],
+                            'prenom' => $comment['author']['userProfile']['prenom'],
+                        ];
+                    }
+
+                    $comments[] = [
+                        'id' => $comment['id'],
+                        'content' => $comment['content'],
+                        'createdAt' => $comment['createdAt']->format('Y-m-d H:i:s'), // Assuming createdAt exists
+                        'author' => $author,
+                    ];
+                }
+            }
+
             return new JsonResponse([
                 'product' => $productData,
-                'comments' => [],
+                'comments' => $comments,
             ], Response::HTTP_OK);
         }
-
-        $productData = [
-            'id' => $data[0]['id'], // Assuming the first element is the product
-            'name' => $data[0]['name'],
-            'description' => $data[0]['description'],
-            'price' => $data[0]['price'],
-        ];
-
-        $comments = [];
-
-        foreach ($data[0]['comments'] as $comment) {
-            $author = $comment['author'] ? [
-                'id' => $comment['author']['id'],
-                'nom' => $comment['author']['userProfile']['nom'],
-                'prenom' => $comment['author']['userProfile']['prenom'],
-            ] : null;
-
-            $comments[] = [
-                'id' => $comment['id'],
-                'content' => $comment['content'],
-                'createdAt' => $comment['createdAt']->format('Y-m-d H:i:s'), // Assuming createdAt exists
-                'author' => $author,
-            ];
-        }
-
-        return new JsonResponse([
-            'product' => $productData,
-            'comments' => $comments,
-        ], Response::HTTP_OK);
     }
 }
