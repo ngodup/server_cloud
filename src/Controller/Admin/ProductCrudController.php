@@ -47,7 +47,7 @@ class ProductCrudController extends AbstractCrudController
         yield ChoiceField::new('category')
             ->setChoices([
                 'Français' => 'français',
-                'Indienne' => 'iindienne',
+                'Indienne' => 'indienne',
                 'Japonaise' => 'japonaise',
                 'Italienne' => 'italienne',
                 'Tibétaine' => 'tibétaine',
