@@ -45,7 +45,7 @@ class Product
 
     #[ORM\Column]
     #[Groups('product:read')]
-    private ?bool $active = null;
+    private ?bool $active = true;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Groups('product:read')]
@@ -84,6 +84,8 @@ class Product
      */
     #[ORM\ManyToMany(targetEntity: Order::class, mappedBy: 'products')]
     private Collection $orders;
+
+
 
     public function __construct()
     {

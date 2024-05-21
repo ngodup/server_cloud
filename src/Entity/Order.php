@@ -2,11 +2,11 @@
 
 namespace App\Entity;
 
+use App\Repository\OrderRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use App\Repository\OrderRepository;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\ArrayCollection;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\Table(name: '`order`')]
@@ -23,7 +23,7 @@ class Order
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $updatedAt = null;
 
-    #[ORM\Column(length: 20)]
+    #[ORM\Column(length: 25)]
     private ?string $status = null;
 
     #[ORM\Column]
@@ -32,25 +32,23 @@ class Order
     #[ORM\Column(length: 25)]
     private ?string $paymentMethod = null;
 
-    // /**
-    //  * @var Collection<int, Product>
-    //  */
-    // #[ORM\ManyToMany(targetEntity: Product::class)]
-    // private Collection $products;
-
-
-    #[ORM\ManyToOne(inversedBy: 'orders')]
-    private ?User $customer = null;
-
     /**
      * @var Collection<int, Product>
      */
-    #[ORM\ManyToMany(targetEntity: Product::class, inversedBy: 'orders')]
+    // #[ORM\ManyToMany(targetEntity: Product::class, inversedBy: 'orders')]
+    #[ORM\ManyToMany(targetEntity: Product::class, inversedBy: 'orders', cascade: ["persist"])]
     private Collection $products;
+
+    // #[ORM\ManyToOne(inversedBy: 'orders')]
+    // private ?User $customer = null;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: "customer_id", referencedColumnName: "id")]
+    private ?User $customer = null;
+
 
     public function __construct()
     {
-        // $this->products = new ArrayCollection();
+        $this->products = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -118,18 +116,6 @@ class Order
         return $this;
     }
 
-    public function getCustomer(): ?User
-    {
-        return $this->customer;
-    }
-
-    public function setCustomer(?User $customer): static
-    {
-        $this->customer = $customer;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, Product>
      */
@@ -150,6 +136,18 @@ class Order
     public function removeProduct(Product $product): static
     {
         $this->products->removeElement($product);
+
+        return $this;
+    }
+
+    public function getCustomer(): ?User
+    {
+        return $this->customer;
+    }
+
+    public function setCustomer(?User $customer): static
+    {
+        $this->customer = $customer;
 
         return $this;
     }
