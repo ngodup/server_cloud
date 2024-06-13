@@ -33,22 +33,18 @@ class Order
     private ?string $paymentMethod = null;
 
     /**
-     * @var Collection<int, Product>
+     * @var Collection<int, OrderProduct>
      */
-    // #[ORM\ManyToMany(targetEntity: Product::class, inversedBy: 'orders')]
-    #[ORM\ManyToMany(targetEntity: Product::class, inversedBy: 'orders', cascade: ["persist"])]
-    private Collection $products;
+    #[ORM\OneToMany(targetEntity: OrderProduct::class, mappedBy: 'orderReference', cascade: ["persist"])]
+    private $orderProducts;
 
-    // #[ORM\ManyToOne(inversedBy: 'orders')]
-    // private ?User $customer = null;
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: "customer_id", referencedColumnName: "id")]
     private ?User $customer = null;
 
-
     public function __construct()
     {
-        $this->products = new ArrayCollection();
+        $this->orderProducts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -117,25 +113,33 @@ class Order
     }
 
     /**
-     * @return Collection<int, Product>
+     * @return Collection<int, OrderProduct>
      */
-    public function getProducts(): Collection
+    public function getOrderProducts(): Collection
     {
-        return $this->products;
+        return $this->orderProducts;
     }
 
-    public function addProduct(Product $product): static
+    public function addOrderProduct(OrderProduct $orderProduct): self
     {
-        if (!$this->products->contains($product)) {
-            $this->products->add($product);
+        if (!$this->orderProducts->contains($orderProduct)) {
+            $this->orderProducts[] = $orderProduct;
+            $orderProduct->setOrderReference($this);
         }
 
         return $this;
     }
 
-    public function removeProduct(Product $product): static
+
+
+    public function removeOrderProduct(OrderProduct $orderProduct): self
     {
-        $this->products->removeElement($product);
+        if ($this->orderProducts->removeElement($orderProduct)) {
+            // set the owning side to null (unless already changed)
+            if ($orderProduct->getOrderReference() === $this) {
+                $orderProduct->setOrderReference(null);
+            }
+        }
 
         return $this;
     }

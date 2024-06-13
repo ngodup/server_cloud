@@ -6,6 +6,7 @@ use DateTime;
 use App\Entity\Order;
 use DateTimeImmutable;
 use App\Entity\Product;
+use App\Entity\OrderProduct;
 use App\Repository\OrderRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
@@ -23,7 +24,7 @@ class OrderController extends AbstractController
     private TokenStorageInterface $tokenStorage;
     private ManagerRegistry $doctrine;
     private SerializerInterface $serializer;
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
     private $orderRepository;
 
     public function __construct(
@@ -37,6 +38,7 @@ class OrderController extends AbstractController
         $this->doctrine = $doctrine;
         $this->serializer = $serializer;
         $this->orderRepository = $orderRepository;
+        $this->entityManager = $entityManager;
     }
 
     #[Route('/api/orders', name: 'add_order', methods: ['POST'])]
@@ -48,7 +50,6 @@ class OrderController extends AbstractController
         }
 
         $order = $this->serializer->deserialize($request->getContent(), Order::class, 'json');
-        // dd($order);
         $dateTime = new DateTimeImmutable();
         $dateTimeMutable = DateTime::createFromImmutable($dateTime);
 
@@ -61,33 +62,37 @@ class OrderController extends AbstractController
         if (null !== $user = $this->tokenStorage->getToken()->getUser()) {
             $order->setCustomer($user);
         } else {
-            // Handle the case when the user is not authenticated (e.g., return an error or set a default value)
+            // Handle the case when the user is not authenticated 
             return new JsonResponse(['error' => 'User not authenticated'], Response::HTTP_UNAUTHORIZED);
         }
 
-        $productIds = $request->query->get('productIds'); // assuming productIds is sent in query parameters
-        $products = $this->doctrine->getRepository(Product::class)->findBy(['id' => $productIds]);
+        // $productIds = $request->query->get('productIds');
+        $requestData = json_decode($request->getContent(), true);
+        $productIds = $requestData['productIds'];
 
-        foreach ($products as $product) {
-            $order->addProduct($product);
+        foreach ($productIds as $productId) {
+            $product = $this->doctrine->getRepository(Product::class)->find($productId);
+
+            if (!$product) {
+                // Handle the case when the product is not found
+                continue;
+            }
+
+            $orderProduct = new OrderProduct();
+            $orderProduct->setProduct($product);
+            $orderProduct->setOrderReference($order);
+            $order->addOrderProduct($orderProduct);
         }
 
-        $entityManager = $this->doctrine->getManager();
-        $entityManager->persist($order);
-        $entityManager->flush();
-
-        // $products = $order->getProducts();
-        // foreach ($products as $product) {
-        //     $order->addProduct($product);
-        // }
-
-        // $entityManager = $this->doctrine->getManager();
-        // $entityManager->persist($order);
-        // $entityManager->flush();
+        $this->entityManager = $this->doctrine->getManager();
+        $this->entityManager->persist($order);
+        $this->entityManager->flush();
 
         $serializedOrder = $this->serializer->serialize($order, 'json', ['groups' => ['order:detail', 'product']]);
         return new JsonResponse($serializedOrder, Response::HTTP_CREATED, [], true);
     }
+
+
 
     #[Route('/api/orders/user', name: 'user_orders', methods: ['GET'])]
     public function getUserOrders(Request $request): JsonResponse
@@ -117,7 +122,8 @@ class OrderController extends AbstractController
                 'products' => []
             ];
 
-            foreach ($order->getProducts() as $product) {
+            foreach ($order->getOrderProducts() as $orderProduct) {
+                $product = $orderProduct->getProduct();
                 $serializedOrder['products'][] = [
                     'id' => $product->getId(),
                     'name' => $product->getName(),

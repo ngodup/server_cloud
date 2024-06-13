@@ -30,6 +30,7 @@ security:
   access_control:
     # Grant access to product listing for anonymous users
     - { path: ^/api/login, roles: PUBLIC_ACCESS }
+    - { path: ^/api/password_reset, roles: PUBLIC_ACCESS }
     - { path: ^/api/me, roles: IS_AUTHENTICATED_FULLY }
     - { path: ^/api/products, roles: PUBLIC_ACCESS, methods: GET }
     - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
