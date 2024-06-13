@@ -21,6 +21,9 @@ class OrderProduct
     #[ORM\JoinColumn(name: 'order_reference_id', referencedColumnName: 'id')]
     private ?Order $orderReference = null;
 
+    #[ORM\Column]
+    private ?int $quantity = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -46,6 +49,18 @@ class OrderProduct
     public function setOrderReference(?Order $orderReference): static
     {
         $this->orderReference = $orderReference;
+
+        return $this;
+    }
+
+    public function getQuantity(): ?int
+    {
+        return $this->quantity;
+    }
+
+    public function setQuantity(int $quantity): static
+    {
+        $this->quantity = $quantity;
 
         return $this;
     }

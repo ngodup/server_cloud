@@ -49,7 +49,11 @@ class OrderController extends AbstractController
             return $this->json(['message' => 'No authentication token found.'], JsonResponse::HTTP_UNAUTHORIZED);
         }
 
-        $order = $this->serializer->deserialize($request->getContent(), Order::class, 'json');
+        $jsonData = $request->getContent();
+        // $order = $this->serializer->deserialize($request->getContent(), Order::class, 'json');
+        $order = $this->serializer->deserialize($jsonData, Order::class, 'json');
+
+
         $dateTime = new DateTimeImmutable();
         $dateTimeMutable = DateTime::createFromImmutable($dateTime);
 
@@ -68,10 +72,11 @@ class OrderController extends AbstractController
 
         // $productIds = $request->query->get('productIds');
         $requestData = json_decode($request->getContent(), true);
-        $productIds = $requestData['productIds'];
+        $products = $requestData['products'];
 
-        foreach ($productIds as $productId) {
-            $product = $this->doctrine->getRepository(Product::class)->find($productId);
+
+        foreach ($products as $product) {
+            $productEntity = $this->doctrine->getRepository(Product::class)->findOneBy(['id' => $product['id']]);
 
             if (!$product) {
                 // Handle the case when the product is not found
@@ -79,8 +84,9 @@ class OrderController extends AbstractController
             }
 
             $orderProduct = new OrderProduct();
-            $orderProduct->setProduct($product);
+            $orderProduct->setProduct($productEntity);
             $orderProduct->setOrderReference($order);
+            $orderProduct->setQuantity($product['quantity']);
             $order->addOrderProduct($orderProduct);
         }
 
@@ -129,6 +135,7 @@ class OrderController extends AbstractController
                     'name' => $product->getName(),
                     'imageName' => $product->getImageName(),
                     'price' => $product->getPrice(),
+                    'quantity' => $orderProduct->getQuantity(),
                 ];
             }
 
