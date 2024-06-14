@@ -4,12 +4,15 @@ namespace App\Controller\Admin;
 
 use App\Service\StripeService;
 use App\Entity\Product;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use Doctrine\ORM\EntityManagerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\Field;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\MoneyField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Vich\UploaderBundle\Form\Type\VichFileType;
@@ -26,6 +29,19 @@ class ProductCrudController extends AbstractCrudController
         return Product::class;
     }
 
+
+    public function configureCrud(Crud $crud): Crud
+    {
+        return $crud
+            ->setEntityLabelInSingular('Product')
+            ->setEntityLabelInPlural('Products')
+            ->setDefaultSort(['createdAt' => 'DESC'])
+            ->setPageTitle('index', 'Liste des produits')
+            ->setPageTitle('new', 'Créer un nouveau produit')
+            ->setPageTitle('edit', 'Modifier le produit')
+            ->setPageTitle('detail', 'Détails du produit');
+    }
+
     public function configureFields(string $pageName): iterable
     {
         yield TextField::new('name')
@@ -36,9 +52,11 @@ class ProductCrudController extends AbstractCrudController
 
         yield BooleanField::new('active');
 
-        yield MoneyField::new('price')
-            ->setCurrency('EUR')
-            ->setRequired(true);
+        // yield MoneyField::new('price')
+        //     ->setCurrency('EUR')
+        //     ->setRequired(true);
+
+        yield IntegerField::new('price')->setRequired(true);
 
         yield Field::new('imageFile', 'Image')
             ->setFormType(VichFileType::class)
@@ -106,5 +124,23 @@ class ProductCrudController extends AbstractCrudController
         $this->stripeService->updateProduct($product);
 
         parent::updateEntity($entityManager, $entityInstance);
+    }
+
+    public function configureActions(Actions $actions): Actions
+    {
+        return $actions
+            ->add(Crud::PAGE_INDEX, Action::DETAIL)
+            ->update(Crud::PAGE_INDEX, Action::NEW, function (Action $action) {
+                return $action->setLabel('Ajouter');
+            })
+            ->update(Crud::PAGE_INDEX, Action::EDIT, function (Action $action) {
+                return $action->setLabel('Modifier');
+            })
+            ->update(Crud::PAGE_INDEX, Action::DELETE, function (Action $action) {
+                return $action->setLabel('Supprimer');
+            })
+            ->update(Crud::PAGE_INDEX, Action::DETAIL, function (Action $action) {
+                return $action->setLabel('Voir');
+            });
     }
 }

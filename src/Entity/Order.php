@@ -76,6 +76,7 @@ class Order
         return $this;
     }
 
+
     public function getStatus(): ?string
     {
         return $this->status;
@@ -86,6 +87,11 @@ class Order
         $this->status = $status;
 
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return sprintf('%s (ID: %d)', $this->getStatus(), $this->getId());
     }
 
     public function getTotalPrice(): ?int
@@ -129,7 +135,6 @@ class Order
 
         return $this;
     }
-
 
 
     public function removeOrderProduct(OrderProduct $orderProduct): self
